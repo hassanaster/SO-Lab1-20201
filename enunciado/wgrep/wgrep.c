@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 //Function instance
 int compare_lines(char *, char *);
@@ -8,16 +9,17 @@ int get_number_lines(char *);
 //Main function
 int main(int argc, char *argv[]){
 
+   
     //Validating when the command is executed without parameters
-    if (argc==0){
+    if (argc==1){
         printf("wgrep: searchterm [file...] \n");
         exit(1);
     //Validating when the term is NULL, no comparisions 
-    }else if(strcmp(argv[1], "NULL")==0 && argc>=1){
+    }else if(strcmp(argv[1], "")==0 && argc>=2){
         printf("wgrep: The term is NULL, in this case there isn't any comparisions \n");
         exit(0); 
     //Validating to apply the logic when there isn't files added and term isn't null, it should works
-    } else if(argc==1 && strcmp(argv[1], "NULL")!=0){
+    } else if(argc==2 && strcmp(argv[1], "")!=0){
         printf("wgrep: This is the case we have to read from Stdin and compare the line - BUILDING \n");
         //We have to create the logic to receive all entries and compare with the term, exit when user clic some key
         exit(0); 
@@ -43,36 +45,25 @@ int compare_lines(char *term, char *file){
     //the quantity of character that a line has
     size_t lineSize; 
     int fileSize;
-    int termSize;
     FILE *f= fopen(file, "r");
+    //printf(" Estoy en la funcion compare lines\n");
     if(f == NULL){
         //file wasn't able to be open
         return 1;
     }else {
-        //It is required to know what is the size from the term to compare
-        termSize = strlen(term);
-        //Create a char with the size of the term to compare with the term
-        char tempBuffer[termSize];
         //It is required to know how many lines we must compare
-        fileSize = get_number_lines(f);
+        fileSize = get_number_lines(file);
+        //printf("%d la cantidad de lineas que tiene el archivo (FileSize)\n", fileSize);
         //First for to move for every line of the file
         for(int i=0; i<fileSize; i++){
             //We take the line in lineBuffer and the Line character size
             lineSize = getline(&lineBuffer, &lineBufferSize, f);
-            //This for is to move in the lineBuffer got
-            for(int j=0; j<lineSize; j++){
-                //This for is to get the quantity of characters to compare with term from the right position in the line Buffer
-                for(k=j;k<termSize+j;k++){
-                    strcpy(tempBuffer, lineBuffer[k]);
-                }
-                //If the piece of lineBuffer we got in the step before is the same of term we print the bufferLine and we out from the cycle of the line to keep comparing the rest lines of the file
-                if(strcmp(tempBuffer,term)==0){
-                    printf("%s", lineBuffer);
-                    printf("\n");
-                    j=lineSize;
-                }
-                //It is needded to make empty this buffer to be able to compare with a new piece from lineBuffer
-                tempBuffer = NULL;
+            //printf("%s Entro al FOR: la cadena que contiene la linea (lineBuffer)\n", lineBuffer);
+            //printf("%zu la cantidad de caracteres que contiene esta linea: (Line Size) \n", lineSize);
+            //If some of the term is on the lineBuffer the result won't be equal null
+            if (strstr(lineBuffer, term) != NULL)
+            {
+                printf("%s \n", lineBuffer);
             }
         }
         fclose(f);
