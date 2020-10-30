@@ -32,7 +32,7 @@ int get_files(char *file){
             printf("%s", listBuffer);
         }
         fclose(app);
-        printf("\n");
+        //printf("\n");
         //file was read correctly
         return 0;
     }

@@ -1,1 +1,0 @@
-This is a example for the comand wcat - example 2
