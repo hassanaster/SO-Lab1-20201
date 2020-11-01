@@ -23,7 +23,6 @@ int main(int argc, char *argv[])
         printf("wzip: file1 [file2 ...]");
         printf("\n");
         exit(1);
-        //Validating when the term is NULL, no comparisions
     }
 
     //Validating if we have a file to write the comprese or not and saving the name of the file
@@ -57,8 +56,6 @@ int main(int argc, char *argv[])
         for (int i = 1; i < argc; i++)
         {
             //Validating when there is any problem openning the file
-            //printf("Entro al for \n");
-            //printf("%s \n", argv[i]);
             if (comprese_lines_stdout(argv[i], stdout) != 0)
             {
                 printf("wzip: cannot open file");
@@ -67,12 +64,11 @@ int main(int argc, char *argv[])
             }
         }
     }
-
     //The command finish to read sucessfully all files
     exit(0);
 }
 
-//Function declare - This function will get the lines that has the string required for the user
+//Function declare - This function will compress the lines from a file to write in other file received
 int comprese_lines_file(char *readFile, char *writeFile)
 {
     FILE *f = fopen(readFile, "r");
@@ -113,6 +109,7 @@ int comprese_lines_file(char *readFile, char *writeFile)
     }
 }
 
+//Function declare - This function will compress the lines from a file to write stdout file
 int comprese_lines_stdout(char *readFile, FILE *writeFile){
     FILE *f = fopen(readFile, "r");
     char next, actual = '\0';
@@ -152,10 +149,6 @@ int comprese_lines_stdout(char *readFile, FILE *writeFile){
 //Method that converts the character counter in bytes and the character in ASCII
 void convert(int counter, char character, FILE *writeFile)
 {
-    //printf("%d counter: \n", counter);
-    //printf("%c character: \n", character);
-    //printf("%lu \n", fwrite(&counter, COUTERLENGHT, 1, writeFile));
-    //printf("%lu \n\n", fwrite(&character, CHARACTERLENGHT, 1, writeFile));
     fwrite(&counter, COUTERLENGHT, 1, writeFile);
     fwrite(&character, CHARACTERLENGHT, 1, writeFile);
 }
