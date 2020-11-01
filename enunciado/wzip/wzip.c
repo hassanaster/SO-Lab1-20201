@@ -3,13 +3,21 @@
 #include <string.h>
 
 //Function instance
-int comprese_lines(char *);
+int comprese_lines_file(char *, char *);
+int comprese_lines_stdout(char *, FILE *);
+void convert(int counter, char character, FILE *writeFile);
+
+#define COUTERLENGHT  4
+#define CHARACTERLENGHT 1
 
 //Main function
 int main(int argc, char *argv[])
 {
-    //Validating when the command is executed without parameters
+    //Boolean to validate if there is or not a file in the command: '1' there isn't, '0' it is a file
+    int isFile = 1;
+    char *file;
 
+    //Validating when the command is executed without parameters
     if (argc == 1)
     {
         printf("wzip: file1 [file2 ...]");
@@ -17,38 +25,59 @@ int main(int argc, char *argv[])
         exit(1);
         //Validating when the term is NULL, no comparisions
     }
-    //comprese will be displaying by stdout
-    /* else if (argc == 2)
-    {
-        //compare_text(argv[1], stdin);
-        //printf("wgrep: This is the case we have to read from Stdin and compare the line - BUILDING \n");
-        exit(0);
-    } // in this case whwn argc == 2 I have to validate if I have or not file to write the result or no: Case 1 write in the file added, Case 2: write with stout*/
-    //Open question - how to open the file to write after greater than ?
 
-    //In this case the system is receiving all the files to comprese in just one file wich is received
+    //Validating if we have a file to write the comprese or not and saving the name of the file
     for (int i = 1; i < argc; i++)
     {
-        //Validating when there is any problem openning the file
-        //printf("Entro al for \n");
-        //printf("%s \n", argv[i]);
-        if (comprese_lines(argv[i]) != 0)
+        if (strcmp(argv[i], ">") == 0)
         {
-            printf("wzip: cannot open file");
-            printf("\n");
-            exit(1);
+            isFile = 0;
+            i++;
+            file = argv[i];
         }
     }
+
+    //If we have a file we activate the function to write in a file
+    if (isFile == 0)
+    {
+        for (int i = 1; i < argc; i++)
+        {
+            //Validating when there is any problem openning the file
+            if (comprese_lines_file(argv[i], file) != 0)
+            {
+                printf("wzip: cannot open file");
+                printf("\n");
+                exit(1);
+            }
+        }
+    }
+    //If we don't have a file we activate the output for stdout
+    else
+    {
+        for (int i = 1; i < argc; i++)
+        {
+            //Validating when there is any problem openning the file
+            //printf("Entro al for \n");
+            //printf("%s \n", argv[i]);
+            if (comprese_lines_stdout(argv[i], stdout) != 0)
+            {
+                printf("wzip: cannot open file");
+                printf("\n");
+                exit(1);
+            }
+        }
+    }
+
     //The command finish to read sucessfully all files
     exit(0);
 }
 
 //Function declare - This function will get the lines that has the string required for the user
-int comprese_lines(char *file)
+int comprese_lines_file(char *readFile, char *writeFile)
 {
-    //printf("Entro a copmprese_line function \n");
-    //int fileSize;
-    FILE *f = fopen(file, "r");
+    FILE *f = fopen(readFile, "r");
+    //'a' format to write at the end of the file
+    FILE *fw = fopen(readFile, "a");
     char next, actual = '\0';
     int cont = 0;
     if (f == NULL)
@@ -57,20 +86,58 @@ int comprese_lines(char *file)
         return 1;
     }
     else
-    {   
+    {   //In this case the file is open, and we start to get each character for each file
         actual = getc(f);
         while (!feof(f))
-        {   next = getc(f);
-            if (next==actual)
+        {   //I get the next character to compare actual and next
+            next = getc(f);
+            if (next == actual)
             {
                 cont++;
             }
             else
-            {   
-                printf("%d%c", cont + 1, actual);
+            {
+                convert(cont+1, actual, fw);
                 actual = next;
                 //just in the case we have a repetitive string we set the counter to 0. If there is just 1 of a character, we don't need to set the counter in 0.
-                if (cont>0)
+                if (cont > 0)
+                {
+                    cont = 0;
+                }
+            }
+        }
+        fclose(f);
+        fclose(fw);
+        //file was read correctly
+        return 0;
+    }
+}
+
+int comprese_lines_stdout(char *readFile, FILE *writeFile){
+    FILE *f = fopen(readFile, "r");
+    char next, actual = '\0';
+    int cont = 0;
+    if (f == NULL)
+    {
+        //file wasn't able to be open
+        return 1;
+    }
+    else
+    {   //In this case the file is open, and we start to get each character for each file
+        actual = getc(f);
+        while (!feof(f))
+        {   //I get the next character to compare actual and next
+            next = getc(f);
+            if (next == actual)
+            {
+                cont++;
+            }
+            else
+            {
+                convert(cont+1, actual, writeFile);
+                actual = next;
+                //just in the case we have a repetitive string we set the counter to 0. If there is just 1 of a character, we don't need to set the counter in 0.
+                if (cont > 0)
                 {
                     cont = 0;
                 }
@@ -82,3 +149,14 @@ int comprese_lines(char *file)
     }
 }
 
+//Method that converts the character counter in bytes and the character in ASCII
+void convert(int counter, char character, FILE *writeFile)
+{
+    //printf("%d counter: \n", counter);
+    //printf("%c character: \n", character);
+    //printf("%lu \n", fwrite(&counter, COUTERLENGHT, 1, writeFile));
+    //printf("%lu \n\n", fwrite(&character, CHARACTERLENGHT, 1, writeFile));
+    fwrite(&counter, COUTERLENGHT, 1, writeFile);
+    fwrite(&character, CHARACTERLENGHT, 1, writeFile);
+}
+//Structure fwrite: OFFSET (memory address), length of the data, length or unit size, file handle.
